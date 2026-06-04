@@ -6,6 +6,27 @@ const _shellReverseDuration = Duration(milliseconds: 260);
 const _detailDuration = Duration(milliseconds: 380);
 const _detailReverseDuration = Duration(milliseconds: 300);
 
+/// Transizione leggera per login e pagine pubbliche.
+CustomTransitionPage<T> fadeTransitionPage<T>({
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 280),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOut,
+        ),
+        child: child,
+      );
+    },
+  );
+}
+
 /// Transizione per le pagine dentro la shell (Code, Gestione, Nuovo).
 CustomTransitionPage<T> shellTransitionPage<T>({
   required GoRouterState state,

@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/repositories/ticket_repository.dart';
+import '../../features/auth/viewmodels/auth_view_model.dart';
+import '../../features/auth/views/login_page.dart';
 import '../../features/shell/widgets/app_shell_layout.dart';
 import '../../features/tickets/viewmodels/new_ticket_view_model.dart';
 import '../../features/tickets/viewmodels/ticket_detail_view_model.dart';
@@ -12,16 +14,24 @@ import '../../features/tickets/views/ticket_detail_page.dart';
 import '../../features/tickets/views/tickets_gestione_page.dart';
 import '../../features/map/views/intervention_map_page.dart';
 import '../../features/tickets/views/tickets_hub_page.dart';
+import 'navigator_keys.dart';
 import 'page_transitions.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
-GoRouter createAppRouter() {
+GoRouter createAppRouter(AuthViewModel auth) {
   return GoRouter(
-    navigatorKey: _rootNavigatorKey,
-    initialLocation: '/tickets',
+    navigatorKey: rootNavigatorKey,
+    initialLocation: '/login',
+    refreshListenable: auth,
     routes: [
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) => fadeTransitionPage(
+          state: state,
+          child: const LoginPage(),
+        ),
+      ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => AppShellLayout(child: child),
@@ -71,7 +81,7 @@ GoRouter createAppRouter() {
       ),
       GoRoute(
         path: '/tickets/:id',
-        parentNavigatorKey: _rootNavigatorKey,
+        parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
           return detailTransitionPage(
@@ -88,7 +98,16 @@ GoRouter createAppRouter() {
       ),
     ],
     redirect: (context, state) {
-      if (state.matchedLocation == '/') return '/tickets';
+      if (auth.isRestoring) return null;
+
+      final location = state.matchedLocation;
+      final onLogin = location == '/login';
+
+      if (!auth.isAuthenticated) {
+        return onLogin ? null : '/login';
+      }
+
+      if (onLogin || location == '/') return '/tickets';
       return null;
     },
   );

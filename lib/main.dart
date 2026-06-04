@@ -4,9 +4,12 @@ import 'package:provider/provider.dart';
 
 import 'app.dart';
 import 'core/router/app_router.dart';
+import 'data/repositories/auth_repository.dart';
 import 'data/repositories/impianto_repository.dart';
 import 'data/repositories/intervention_map_repository.dart';
 import 'data/repositories/ticket_repository.dart';
+import 'features/auth/viewmodels/auth_view_model.dart';
+import 'features/chat/viewmodels/ticket_chat_view_model.dart';
 import 'features/map/viewmodels/intervention_map_view_model.dart';
 import 'features/tickets/viewmodels/tickets_list_view_model.dart';
 
@@ -21,15 +24,20 @@ class GestionaleTicketRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authRepository = MockAuthRepository();
+    final authViewModel = AuthViewModel(authRepository);
     final ticketRepository = MockTicketRepository();
     final impiantoRepository = MockImpiantoRepository();
     final mapRepository = MockInterventionMapRepository(
       ticketRepository,
       impiantoRepository,
     );
+    final router = createAppRouter(authViewModel);
 
     return MultiProvider(
       providers: [
+        Provider<AuthRepository>.value(value: authRepository),
+        ChangeNotifierProvider<AuthViewModel>.value(value: authViewModel),
         Provider<TicketRepository>.value(value: ticketRepository),
         Provider<ImpiantoRepository>.value(value: impiantoRepository),
         Provider<InterventionMapRepository>.value(value: mapRepository),
@@ -40,13 +48,14 @@ class GestionaleTicketRoot extends StatelessWidget {
           create: (ctx) =>
               InterventionMapViewModel(ctx.read<InterventionMapRepository>()),
         ),
+        ChangeNotifierProvider(
+          create: (ctx) => TicketChatViewModel(
+            ticketRepository: ctx.read<TicketRepository>(),
+            impiantoRepository: ctx.read<ImpiantoRepository>(),
+          ),
+        ),
       ],
-      child: Builder(
-        builder: (context) {
-          final router = createAppRouter();
-          return GestionaleTicketApp(router: router);
-        },
-      ),
+      child: GestionaleTicketApp(router: router),
     );
   }
 }

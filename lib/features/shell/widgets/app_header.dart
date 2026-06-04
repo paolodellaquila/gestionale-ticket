@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/responsive/breakpoints.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/date_format.dart';
+import '../../auth/viewmodels/auth_view_model.dart';
 import '../../tickets/viewmodels/tickets_list_view_model.dart';
 import 'app_navigation.dart';
 
@@ -24,6 +25,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final counts = context.watch<TicketsListViewModel>().counts;
+    final user = context.watch<AuthViewModel>().currentUser;
     final isMobile = context.isMobile;
     final path = GoRouterState.of(context).uri.path;
     final canAdd = path.startsWith('/tickets') && !path.contains('/nuovo');
@@ -66,6 +68,11 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           ),
         PopupMenuButton<String>(
           offset: const Offset(0, 48),
+          onSelected: (value) async {
+            if (value == 'logout') {
+              await context.read<AuthViewModel>().logout();
+            }
+          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
@@ -73,9 +80,9 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                 CircleAvatar(
                   radius: 16,
                   backgroundColor: AppColors.primary.withValues(alpha: 0.15),
-                  child: const Text(
-                    'AE',
-                    style: TextStyle(
+                  child: Text(
+                    user?.initials ?? '?',
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -84,17 +91,23 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 if (!isMobile) ...[
                   const SizedBox(width: 8),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'arduino.esposito',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        user?.username ?? '',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       Text(
-                        'Operatore',
-                        style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+                        user?.roleLabel ?? '',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),

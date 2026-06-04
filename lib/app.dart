@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/theme/app_theme.dart';
+import 'features/chat/widgets/ticket_chat_overlay.dart';
 
 class GestionaleTicketApp extends StatelessWidget {
   const GestionaleTicketApp({super.key, required this.router});
@@ -15,6 +16,8 @@ class GestionaleTicketApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
       routerConfig: router,
+      builder: (context, child) =>
+          TicketChatOverlay(child: child ?? const SizedBox.shrink()),
       locale: const Locale('it', 'IT'),
       supportedLocales: const [Locale('it', 'IT')],
       localizationsDelegates: const [
