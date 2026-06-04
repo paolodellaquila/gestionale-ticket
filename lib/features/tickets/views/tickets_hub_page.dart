@@ -6,7 +6,7 @@ import '../../../core/responsive/breakpoints.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/ticket.dart';
 import '../../../shared/widgets/queue_stat_card.dart';
-import '../../../shared/widgets/search_filter_bar.dart';
+import '../../../shared/widgets/ticket_filters_panel.dart';
 import '../../../shared/widgets/section_panel.dart';
 import '../../../shared/widgets/ticket_card.dart';
 import '../viewmodels/tickets_list_view_model.dart';
@@ -59,15 +59,9 @@ class _TicketsHubPageState extends State<TicketsHubPage> {
           children: [
             _QueueOverview(vm: vm),
             const SizedBox(height: AppSpacing.lg),
-            SearchFilterBar(
-              controller: _searchController,
-              onSearch: () => vm.setSearchQuery(_searchController.text),
-              onClear: () {
-                _searchController.clear();
-                vm.clearSearch();
-              },
-              selectedType: vm.tipologiaFilter,
-              onTypeChanged: vm.setTipologiaFilter,
+            TicketFiltersPanel(
+              searchController: _searchController,
+              visibleCount: vm.visibleCountCurrentTab,
             ),
             const SizedBox(height: AppSpacing.md),
             _MainTabBar(vm: vm),
