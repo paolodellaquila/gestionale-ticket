@@ -25,6 +25,12 @@ const ticketNavDestinations = [
     route: '/tickets',
   ),
   NavDestination(
+    label: 'Mappa',
+    icon: Icons.map_outlined,
+    selectedIcon: Icons.map,
+    route: '/tickets/mappa',
+  ),
+  NavDestination(
     label: 'Gestione',
     icon: Icons.manage_search_outlined,
     selectedIcon: Icons.manage_search,
@@ -39,8 +45,9 @@ const ticketNavDestinations = [
 ];
 
 int navIndexForPath(String path) {
-  if (path.startsWith('/tickets/nuovo')) return 2;
-  if (path.startsWith('/tickets/gestione')) return 1;
+  if (path.startsWith('/tickets/nuovo')) return 3;
+  if (path.startsWith('/tickets/gestione')) return 2;
+  if (path.startsWith('/tickets/mappa')) return 1;
   if (path.startsWith('/tickets')) return 0;
   return 0;
 }

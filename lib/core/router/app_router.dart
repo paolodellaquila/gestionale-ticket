@@ -10,7 +10,9 @@ import '../../features/tickets/viewmodels/tickets_list_view_model.dart';
 import '../../features/tickets/views/new_ticket_page.dart';
 import '../../features/tickets/views/ticket_detail_page.dart';
 import '../../features/tickets/views/tickets_gestione_page.dart';
+import '../../features/map/views/intervention_map_page.dart';
 import '../../features/tickets/views/tickets_hub_page.dart';
+import 'page_transitions.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -26,27 +28,43 @@ GoRouter createAppRouter() {
         routes: [
           GoRoute(
             path: '/tickets',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final tabParam = state.uri.queryParameters['tab'];
               final initialTab = switch (tabParam) {
                 'oe' => TicketsMainTab.ticketsOe,
                 'interventi' => TicketsMainTab.ticketsInterventi,
                 _ => TicketsMainTab.tickets,
               };
-              return TicketsHubPage(initialTab: initialTab);
+              return shellTransitionPage(
+                state: state,
+                child: TicketsHubPage(initialTab: initialTab),
+              );
             },
           ),
           GoRoute(
+            path: '/tickets/mappa',
+            pageBuilder: (context, state) => shellTransitionPage(
+              state: state,
+              child: const InterventionMapPage(),
+            ),
+          ),
+          GoRoute(
             path: '/tickets/gestione',
-            builder: (context, state) => const TicketsGestionePage(),
+            pageBuilder: (context, state) => shellTransitionPage(
+              state: state,
+              child: const TicketsGestionePage(),
+            ),
           ),
           GoRoute(
             path: '/tickets/nuovo',
-            builder: (context, state) => ChangeNotifierProvider(
-              create: (_) => NewTicketViewModel(
-                context.read<TicketRepository>(),
+            pageBuilder: (context, state) => shellTransitionPage(
+              state: state,
+              child: ChangeNotifierProvider(
+                create: (_) => NewTicketViewModel(
+                  context.read<TicketRepository>(),
+                ),
+                child: const NewTicketPage(),
               ),
-              child: const NewTicketPage(),
             ),
           ),
         ],
@@ -54,14 +72,17 @@ GoRouter createAppRouter() {
       GoRoute(
         path: '/tickets/:id',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final id = state.pathParameters['id']!;
-          return ChangeNotifierProvider(
-            create: (_) => TicketDetailViewModel(
-              context.read<TicketRepository>(),
-              id,
-            )..load(),
-            child: TicketDetailPage(ticketId: id),
+          return detailTransitionPage(
+            state: state,
+            child: ChangeNotifierProvider(
+              create: (_) => TicketDetailViewModel(
+                context.read<TicketRepository>(),
+                id,
+              )..load(),
+              child: TicketDetailPage(ticketId: id),
+            ),
           );
         },
       ),

@@ -115,6 +115,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _titleForPath(String path) {
     final title = switch (path) {
+      '/tickets/mappa' => 'Mappa interventi',
       '/tickets/gestione' => 'Gestione ticket',
       '/tickets/nuovo' => 'Nuovo ticket',
       _ when path.contains(RegExp(r'^/tickets/\d')) => 'Dettaglio ticket',
