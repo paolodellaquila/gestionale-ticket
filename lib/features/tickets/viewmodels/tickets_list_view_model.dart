@@ -6,6 +6,8 @@ import '../../../data/repositories/ticket_repository.dart';
 
 enum TicketsMainTab { tickets, ticketsOe, ticketsInterventi }
 
+enum TicketHubLayout { cards, table }
+
 enum GestioneSubTab { daLavorare, inLavorazione, chiusi }
 
 class TicketsListViewModel extends ChangeNotifier {
@@ -16,6 +18,7 @@ class TicketsListViewModel extends ChangeNotifier {
   bool _loading = true;
   TicketFilters _filters = const TicketFilters();
   TicketsMainTab _mainTab = TicketsMainTab.tickets;
+  TicketHubLayout _hubLayout = TicketHubLayout.cards;
   GestioneSubTab _gestioneTab = GestioneSubTab.inLavorazione;
   int _currentPage = 0;
   static const int pageSize = 15;
@@ -28,6 +31,7 @@ class TicketsListViewModel extends ChangeNotifier {
   String get searchQuery => _filters.searchQuery;
   TicketType? get tipologiaFilter => _filters.tipologia;
   TicketsMainTab get mainTab => _mainTab;
+  TicketHubLayout get hubLayout => _hubLayout;
   GestioneSubTab get gestioneTab => _gestioneTab;
   int get currentPage => _currentPage;
   int get activeFilterCount => _filters.activeCount;
@@ -123,6 +127,12 @@ class TicketsListViewModel extends ChangeNotifier {
 
   void setMainTab(TicketsMainTab tab) {
     _mainTab = tab;
+    notifyListeners();
+  }
+
+  void setHubLayout(TicketHubLayout layout) {
+    if (_hubLayout == layout) return;
+    _hubLayout = layout;
     notifyListeners();
   }
 

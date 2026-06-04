@@ -9,6 +9,8 @@ import '../../../shared/widgets/queue_stat_card.dart';
 import '../../../shared/widgets/ticket_filters_panel.dart';
 import '../../../shared/widgets/section_panel.dart';
 import '../../../shared/widgets/ticket_card.dart';
+import '../../../shared/widgets/ticket_hub_layout_toggle.dart';
+import '../../../shared/widgets/ticket_list_display.dart';
 import '../viewmodels/tickets_list_view_model.dart';
 import 'ticket_history_dialog.dart';
 import 'ticket_reassign_dialog.dart';
@@ -64,7 +66,7 @@ class _TicketsHubPageState extends State<TicketsHubPage> {
               visibleCount: vm.visibleCountCurrentTab,
             ),
             const SizedBox(height: AppSpacing.md),
-            _MainTabBar(vm: vm),
+            const TicketHubLayoutToggle(),
             const SizedBox(height: AppSpacing.lg),
             switch (vm.mainTab) {
               TicketsMainTab.tickets => _TicketsQueues(
@@ -114,20 +116,16 @@ class _QueueOverview extends StatelessWidget {
     final counts = vm.counts;
     final isMobile = context.isMobile;
 
+    final ticketCount =
+        vm.processareTickets.length + vm.scadenzaTickets.length;
+
     final cards = [
       QueueStatCard(
-        label: 'Da processare',
-        count: vm.processareTickets.length,
-        icon: Icons.pending_actions,
+        label: 'Ticket',
+        count: ticketCount,
+        icon: Icons.inbox_outlined,
         color: AppColors.primary,
         selected: vm.mainTab == TicketsMainTab.tickets,
-        onTap: () => _selectTab(context, vm, TicketsMainTab.tickets, ''),
-      ),
-      QueueStatCard(
-        label: 'In scadenza',
-        count: vm.scadenzaTickets.length,
-        icon: Icons.event_busy,
-        color: AppColors.danger,
         onTap: () => _selectTab(context, vm, TicketsMainTab.tickets, ''),
       ),
       QueueStatCard(
@@ -159,10 +157,10 @@ class _QueueOverview extends StatelessWidget {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 4,
+      crossAxisCount: 3,
       mainAxisSpacing: AppSpacing.md,
       crossAxisSpacing: AppSpacing.md,
-      childAspectRatio: 2.4,
+      childAspectRatio: 2.6,
       children: cards,
     );
   }
@@ -175,46 +173,6 @@ class _QueueOverview extends StatelessWidget {
   ) {
     vm.setMainTab(tab);
     context.go('/tickets$query');
-  }
-}
-
-class _MainTabBar extends StatelessWidget {
-  const _MainTabBar({required this.vm});
-
-  final TicketsListViewModel vm;
-
-  @override
-  Widget build(BuildContext context) {
-    return SegmentedButton<TicketsMainTab>(
-      segments: [
-        ButtonSegment(
-          value: TicketsMainTab.tickets,
-          label: Text('Tickets (${vm.processareTickets.length + vm.scadenzaTickets.length})'),
-          icon: const Icon(Icons.inbox_outlined, size: 18),
-        ),
-        ButtonSegment(
-          value: TicketsMainTab.ticketsOe,
-          label: Text('OE (${vm.offerteInAttesa.length + vm.offerteDaInviare.length})'),
-          icon: const Icon(Icons.receipt_long_outlined, size: 18),
-        ),
-        ButtonSegment(
-          value: TicketsMainTab.ticketsInterventi,
-          label: Text('Interventi (${vm.interventiTickets.length})'),
-          icon: const Icon(Icons.build_outlined, size: 18),
-        ),
-      ],
-      selected: {vm.mainTab},
-      onSelectionChanged: (s) {
-        final tab = s.first;
-        vm.setMainTab(tab);
-        final query = switch (tab) {
-          TicketsMainTab.tickets => '',
-          TicketsMainTab.ticketsOe => '?tab=oe',
-          TicketsMainTab.ticketsInterventi => '?tab=interventi',
-        };
-        context.go('/tickets$query');
-      },
-    );
   }
 }
 
@@ -232,8 +190,9 @@ class _TicketsQueues extends StatelessWidget {
           title: 'Processare',
           subtitle: 'Ticket da prendere in carico',
           accentColor: AppColors.primary,
-          child: TicketCardGrid(
+          child: TicketListDisplay(
             tickets: vm.processareTickets,
+            layout: vm.hubLayout,
             onAction: onAction,
           ),
         ),
@@ -242,8 +201,9 @@ class _TicketsQueues extends StatelessWidget {
           title: 'In scadenza o scaduti',
           subtitle: 'Priorità temporale — richiedono attenzione immediata',
           accentColor: AppColors.danger,
-          child: TicketCardGrid(
+          child: TicketListDisplay(
             tickets: vm.scadenzaTickets,
+            layout: vm.hubLayout,
             highlightDeadline: true,
             onAction: onAction,
           ),
@@ -267,8 +227,9 @@ class _OeQueues extends StatelessWidget {
           title: 'In attesa del cliente',
           subtitle: 'Offerte economiche in attesa di risconto',
           accentColor: AppColors.anomalia,
-          child: TicketCardGrid(
+          child: TicketListDisplay(
             tickets: vm.offerteInAttesa,
+            layout: vm.hubLayout,
             onAction: onAction,
           ),
         ),
@@ -277,8 +238,9 @@ class _OeQueues extends StatelessWidget {
           title: 'Da inviare',
           subtitle: 'Proposte da inviare al cliente',
           accentColor: AppColors.warning,
-          child: TicketCardGrid(
+          child: TicketListDisplay(
             tickets: vm.offerteDaInviare,
+            layout: vm.hubLayout,
             onAction: onAction,
           ),
         ),
@@ -299,8 +261,9 @@ class _InterventiQueue extends StatelessWidget {
       title: 'Interventi da effettuare',
       subtitle: 'Attività tecniche in campo',
       accentColor: AppColors.secondary,
-      child: TicketCardGrid(
+      child: TicketListDisplay(
         tickets: vm.interventiTickets,
+        layout: vm.hubLayout,
         onAction: onAction,
       ),
     );
