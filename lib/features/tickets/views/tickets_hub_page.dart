@@ -63,8 +63,6 @@ class _TicketsHubPageState extends State<TicketsHubPage> {
               searchController: _searchController,
               visibleCount: vm.visibleCountCurrentTab,
             ),
-            const SizedBox(height: AppSpacing.md),
-            _MainTabBar(vm: vm),
             const SizedBox(height: AppSpacing.lg),
             switch (vm.mainTab) {
               TicketsMainTab.tickets => _TicketsQueues(
@@ -114,20 +112,16 @@ class _QueueOverview extends StatelessWidget {
     final counts = vm.counts;
     final isMobile = context.isMobile;
 
+    final ticketCount =
+        vm.processareTickets.length + vm.scadenzaTickets.length;
+
     final cards = [
       QueueStatCard(
-        label: 'Da processare',
-        count: vm.processareTickets.length,
-        icon: Icons.pending_actions,
+        label: 'Ticket',
+        count: ticketCount,
+        icon: Icons.inbox_outlined,
         color: AppColors.primary,
         selected: vm.mainTab == TicketsMainTab.tickets,
-        onTap: () => _selectTab(context, vm, TicketsMainTab.tickets, ''),
-      ),
-      QueueStatCard(
-        label: 'In scadenza',
-        count: vm.scadenzaTickets.length,
-        icon: Icons.event_busy,
-        color: AppColors.danger,
         onTap: () => _selectTab(context, vm, TicketsMainTab.tickets, ''),
       ),
       QueueStatCard(
@@ -159,10 +153,10 @@ class _QueueOverview extends StatelessWidget {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 4,
+      crossAxisCount: 3,
       mainAxisSpacing: AppSpacing.md,
       crossAxisSpacing: AppSpacing.md,
-      childAspectRatio: 2.4,
+      childAspectRatio: 2.6,
       children: cards,
     );
   }
@@ -175,46 +169,6 @@ class _QueueOverview extends StatelessWidget {
   ) {
     vm.setMainTab(tab);
     context.go('/tickets$query');
-  }
-}
-
-class _MainTabBar extends StatelessWidget {
-  const _MainTabBar({required this.vm});
-
-  final TicketsListViewModel vm;
-
-  @override
-  Widget build(BuildContext context) {
-    return SegmentedButton<TicketsMainTab>(
-      segments: [
-        ButtonSegment(
-          value: TicketsMainTab.tickets,
-          label: Text('Tickets (${vm.processareTickets.length + vm.scadenzaTickets.length})'),
-          icon: const Icon(Icons.inbox_outlined, size: 18),
-        ),
-        ButtonSegment(
-          value: TicketsMainTab.ticketsOe,
-          label: Text('OE (${vm.offerteInAttesa.length + vm.offerteDaInviare.length})'),
-          icon: const Icon(Icons.receipt_long_outlined, size: 18),
-        ),
-        ButtonSegment(
-          value: TicketsMainTab.ticketsInterventi,
-          label: Text('Interventi (${vm.interventiTickets.length})'),
-          icon: const Icon(Icons.build_outlined, size: 18),
-        ),
-      ],
-      selected: {vm.mainTab},
-      onSelectionChanged: (s) {
-        final tab = s.first;
-        vm.setMainTab(tab);
-        final query = switch (tab) {
-          TicketsMainTab.tickets => '',
-          TicketsMainTab.ticketsOe => '?tab=oe',
-          TicketsMainTab.ticketsInterventi => '?tab=interventi',
-        };
-        context.go('/tickets$query');
-      },
-    );
   }
 }
 
